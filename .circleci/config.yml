@@ -1,0 +1,119 @@
+
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@3.1.1
+  docker: circleci/docker@2.1.2
+  terraform: circleci/terraform@3.1.0
+
+jobs:
+  aws-set-profiles:
+    executor: aws-cli/default
+    steps:
+      - aws-cli/install
+      - aws-cli/setup:
+          profile-name: "ci-security"
+      - run:
+          name: Set up assumed role profile
+          command: |
+            aws configure set profile.ci-shared.region us-west-2
+            aws configure set profile.ci-shared.source_profile ci-security
+            aws configure set profile.ci-shared.role_arn arn:aws:iam::$AWS_ECR_ACCOUNT_ID:role/Shared-Account-Admin
+            aws configure set profile.ci-data.region us-west-2
+            aws configure set profile.ci-data.source_profile ci-security
+            aws configure set profile.ci-data.role_arn arn:aws:iam::582526512915:role/Data-Account-Admin
+      - persist_to_workspace:
+          root: ~/.aws
+          paths:
+            - credentials
+            - config
+
+  create-repo:
+    docker:
+      - image: alpine/terragrunt:1.2.3
+    environment:
+      TERRAGRUNT_IAM_ROLE: arn:aws:iam::301451991843:role/Shared-Account-Admin
+    steps:
+      - checkout
+      - run:
+          name: Terragrunt init
+          working_directory: terraform-ecr
+          command: terragrunt init
+      - run:
+          name: Terragrunt plan
+          working_directory: terraform-ecr
+          command: terragrunt plan -out ecr.out
+      - run:
+          name: Terragrunt apply
+          working_directory: terraform-ecr
+          command: terragrunt apply ecr.out
+
+  aws-build-and-push-image:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - aws-cli/install
+      - docker/install-docker
+      - attach_workspace:
+          at: ~/.aws
+      - run:
+          name: Log into Amazon ECR
+          command:
+            aws ecr get-login-password --profile ci-shared | docker login --username AWS --password-stdin $AWS_ECR_ACCOUNT_URL
+      - docker/build:
+          image: alphafold
+          registry: $AWS_ECR_ACCOUNT_URL
+      - docker/push:
+          image: alphafold
+          registry: $AWS_ECR_ACCOUNT_URL
+
+  deploy:
+    docker:
+      - image: alpine/terragrunt:1.2.3
+    environment:
+      TERRAGRUNT_IAM_ROLE: arn:aws:iam::582526512915:role/Data-Account-Admin
+    steps:
+      - checkout
+      - run:
+          name: Terragrunt init
+          working_directory: terraform
+          command: terragrunt init
+      - run:
+          name: Terragrunt plan
+          working_directory: terraform
+          command: terragrunt plan -out etl.out -var "image=${AWS_ECR_ACCOUNT_URL}/alphafold:${CIRCLE_SHA1}"
+      - run:
+          name: Terragrunt apply
+          working_directory: terraform
+          command: terragrunt apply etl.out
+
+# Orchestrate or schedule a set of jobs
+workflows:
+  build_and_push_image:
+    jobs:
+      - create-repo:
+          context: aws-ci
+      - aws-set-profiles:
+          context: aws-ci
+          # filters:
+          #   branches:
+          #     only:
+          #       - master
+      - aws-build-and-push-image:
+          context: aws-ci
+          # filters:
+          #   branches:
+          #     only:
+          #       - master
+          requires:
+            - create-repo
+            - aws-set-profiles
+      - deploy:
+          context: aws-ci
+          # filters:
+          #   branches:
+          #     only:
+          #       - master
+          requires:
+            - aws-build-and-push-image
