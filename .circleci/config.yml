@@ -63,6 +63,7 @@ jobs:
             aws ecr get-login-password --profile ci-shared | docker login --username AWS --password-stdin $AWS_ECR_ACCOUNT_URL
       - docker/build:
           image: alphafold
+          path: docker
           registry: $AWS_ECR_ACCOUNT_URL
       - docker/push:
           image: alphafold
