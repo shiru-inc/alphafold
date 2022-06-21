@@ -50,11 +50,12 @@ jobs:
 
   aws-build-and-push-image:
     machine:
-      resource_class: gpu.nvidia.small
       image: ubuntu-1604-cuda-10.1:201909-23
       docker_layer_caching: true
+    resource_class: gpu.nvidia.small      
     steps:
       - run: nvidia-smi
+      - run: docker run --gpus all nvidia/cuda:9.0-base nvidia-smi
       - checkout
       - aws-cli/install
       - docker/install-docker
