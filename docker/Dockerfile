@@ -64,12 +64,13 @@ RUN wget -q -P /app/alphafold/alphafold/common/ \
   https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt
 
 # Install pip packages.
+# https://github.com/deepmind/alphafold/issues/510
 RUN pip3 install --upgrade pip \
     && pip3 install -r /app/alphafold/requirements.txt \
     && pip3 install --upgrade \
       jax==0.2.14 \
       jaxlib==0.1.69+cuda$(cut -f1,2 -d. <<< ${CUDA} | sed 's/\.//g') \
-      -f https://storage.googleapis.com/jax-releases/jax_releases.html
+      -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html 
 
 # Apply OpenMM patch.
 WORKDIR /opt/conda/lib/python3.7/site-packages
