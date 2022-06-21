@@ -22,15 +22,16 @@ ARG CUDA
 SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        build-essential \
-        cmake \
-        cuda-command-line-tools-$(cut -f1,2 -d- <<< ${CUDA//./-}) \
-        git \
-        hmmer \
-        kalign \
-        tzdata \
-        wget \
-    && rm -rf /var/lib/apt/lists/*
+  aria2 \
+  build-essential \
+  cmake \
+  cuda-command-line-tools-$(cut -f1,2 -d- <<< ${CUDA//./-}) \
+  git \
+  hmmer \
+  kalign \
+  tzdata \
+  wget \
+  && rm -rf /var/lib/apt/lists/*
 
 # Compile HHsuite from source.
 RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh-suite \
