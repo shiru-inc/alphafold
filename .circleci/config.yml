@@ -68,6 +68,12 @@ jobs:
       - docker/push:
           image: alphafold
           registry: $AWS_ECR_ACCOUNT_URL
+      - docker/build:
+          image: alphafold-dl
+          registry: $AWS_ECR_ACCOUNT_URL
+      - docker/push:
+          image: alphafold-dl
+          registry: $AWS_ECR_ACCOUNT_URL
 
   deploy:
     docker:
