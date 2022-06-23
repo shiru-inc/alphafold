@@ -67,7 +67,10 @@ jobs:
           registry: $AWS_ECR_ACCOUNT_URL
       - docker/push:
           image: alphafold
-          tag: $CIRCLE_SHA1,latest
+          registry: $AWS_ECR_ACCOUNT_URL
+      - docker/push:
+          image: alphafold
+          tag: latest
           registry: $AWS_ECR_ACCOUNT_URL
 
   aws-build-and-push-dl-image:
@@ -88,7 +91,10 @@ jobs:
           registry: $AWS_ECR_ACCOUNT_URL
       - docker/push:
           image: alphafold-dl
-          tag: $CIRCLE_SHA1,latest
+          registry: $AWS_ECR_ACCOUNT_URL
+      - docker/push:
+          image: alphafold-dl
+          tag: latest
           registry: $AWS_ECR_ACCOUNT_URL
 
 # Orchestrate or schedule a set of jobs
