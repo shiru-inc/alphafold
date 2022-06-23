@@ -1,5 +1,7 @@
-FROM alpine:3
+FROM debian:stable-slim
 
 ADD ./scripts/ /usr/local/bin/
 
-RUN apk add --update --no-cache aria2 bash && rm -rf /var/cache/apk/*
+RUN apt-get update && apt-get install -y \
+    aria2 \
+    && rm -rf /var/lib/apt/lists/*
