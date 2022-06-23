@@ -84,16 +84,16 @@ jobs:
       - checkout
       - run:
           name: Terragrunt init
-          working_directory: terraform
+          working_directory: terraform-ecr
           command: terragrunt init
       - run:
           name: Terragrunt plan
-          working_directory: terraform
-          command: terragrunt plan -out etl.out -var "image=${AWS_ECR_ACCOUNT_URL}/alphafold:${CIRCLE_SHA1}"
+          working_directory: terraform-ecr
+          command: terragrunt plan -out alphafold.out
       - run:
           name: Terragrunt apply
-          working_directory: terraform
-          command: terragrunt apply etl.out
+          working_directory: terraform-ecr
+          command: terragrunt apply alphafold.out
 
 # Orchestrate or schedule a set of jobs
 workflows:
@@ -122,5 +122,3 @@ workflows:
           #   branches:
           #     only:
           #       - master
-          requires:
-            - aws-build-and-push-image
