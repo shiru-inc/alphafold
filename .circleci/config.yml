@@ -75,26 +75,6 @@ jobs:
           image: alphafold-dl
           registry: $AWS_ECR_ACCOUNT_URL
 
-  deploy:
-    docker:
-      - image: alpine/terragrunt:0.13.5
-    environment:
-      TERRAGRUNT_IAM_ROLE: arn:aws:iam::582526512915:role/Data-Account-Admin
-    steps:
-      - checkout
-      - run:
-          name: Terragrunt init
-          working_directory: terraform-ecr
-          command: terragrunt init
-      - run:
-          name: Terragrunt plan
-          working_directory: terraform-ecr
-          command: terragrunt plan -out alphafold.out
-      - run:
-          name: Terragrunt apply
-          working_directory: terraform-ecr
-          command: terragrunt apply alphafold.out
-
 # Orchestrate or schedule a set of jobs
 workflows:
   build_and_push_image:
@@ -116,9 +96,3 @@ workflows:
           requires:
             - create-repo
             - aws-set-profiles
-      - deploy:
-          context: aws-ci
-          # filters:
-          #   branches:
-          #     only:
-          #       - master
