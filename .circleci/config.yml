@@ -69,6 +69,20 @@ jobs:
           image: alphafold
           tag: $CIRCLE_SHA1,latest
           registry: $AWS_ECR_ACCOUNT_URL
+
+  aws-build-and-push-dl-image:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - aws-cli/install
+      - docker/install-docker
+      - attach_workspace:
+          at: ~/.aws
+      - run:
+          name: Log into Amazon ECR
+          command:
+            aws ecr get-login-password --profile ci-shared | docker login --username AWS --password-stdin $AWS_ECR_ACCOUNT_URL
       - docker/build:
           image: alphafold-dl
           registry: $AWS_ECR_ACCOUNT_URL
@@ -90,6 +104,15 @@ workflows:
           #     only:
           #       - master
       - aws-build-and-push-image:
+          context: aws-ci
+          # filters:
+          #   branches:
+          #     only:
+          #       - master
+          requires:
+            - create-repo
+            - aws-set-profiles
+      - aws-build-and-push-dl-image:
           context: aws-ci
           # filters:
           #   branches:
