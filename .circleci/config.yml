@@ -68,6 +68,11 @@ jobs:
       - docker/push:
           image: alphafold
           registry: $AWS_ECR_ACCOUNT_URL
+      - docker/build:
+          image: alphafold
+          path: docker
+          tag: latest
+          registry: $AWS_ECR_ACCOUNT_URL
       - docker/push:
           image: alphafold
           tag: latest
@@ -91,6 +96,10 @@ jobs:
           registry: $AWS_ECR_ACCOUNT_URL
       - docker/push:
           image: alphafold-dl
+          registry: $AWS_ECR_ACCOUNT_URL
+      - docker/build:
+          image: alphafold-dl
+          tag: latest
           registry: $AWS_ECR_ACCOUNT_URL
       - docker/push:
           image: alphafold-dl
