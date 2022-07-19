@@ -6,7 +6,7 @@ remote_state {
   }
   config = {
     bucket  = "shiru-shared-ecr-terraform"
-    key     = "etl-alphafold/terraform.tfstate"
+    key     = "alphafold/terraform.tfstate"
     region  = "us-west-2"
     encrypt = true
   }
