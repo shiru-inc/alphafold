@@ -30,7 +30,7 @@ jobs:
 
   create-repo:
     docker:
-      - image: alpine/terragrunt:0.13.5
+      - image: alpine/terragrunt:0.15.0
     environment:
       TERRAGRUNT_IAM_ROLE: arn:aws:iam::301451991843:role/Shared-Account-Admin
     steps:
