@@ -1,4 +1,4 @@
-resource "aws_ecr_repository" "etl-alphafold" {
+resource "aws_ecr_repository" "alphafold" {
   name = "alphafold"
 
   image_scanning_configuration {
@@ -6,7 +6,7 @@ resource "aws_ecr_repository" "etl-alphafold" {
   }
 }
 
-resource "aws_ecr_repository" "etl-alphafold-dl" {
+resource "aws_ecr_repository" "alphafold-dl" {
   name = "alphafold-dl"
 
   image_scanning_configuration {
